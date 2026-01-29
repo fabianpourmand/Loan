@@ -128,7 +128,7 @@ export const GOLDEN_CASES: GoldenCase[] = [
       summary: {
         totalInterest: 327973n,
         totalPrincipal: 10000000n,
-        numberOfPayments: 13
+        numberOfPayments: 12
       }
     }
   },
@@ -283,6 +283,80 @@ export const GOLDEN_CASES: GoldenCase[] = [
         totalInterest: 16685n,
         totalPrincipal: 2500000n,
         numberOfPayments: 3
+      }
+    }
+  },
+  {
+    id: 'monthly_300k_6pct_30y_2026-01-01',
+    description: 'Calculator-backed: $300k at 6% for 30 years (verified against Calculator.net, Bankrate, MortgageCalculator.org on 2026-01-29)',
+    loanParams: {
+      principal: 30000000n, // $300,000.00
+      annualRate: 0.06, // 6% APR
+      termMonths: 360,
+      firstPaymentDate: new Date('2026-02-01T00:00:00.000Z'),
+      escrow: Money.ZERO,
+      pmi: Money.ZERO,
+      hoa: Money.ZERO
+    },
+    assumptions: Assumptions.STANDARD_MONTHLY,
+    expected: {
+      first3Rows: [
+        {
+          periodNumber: 1,
+          paymentDate: new Date('2026-02-01T00:00:00.000Z'),
+          beginningBalance: 30000000n,
+          scheduledPayment: 179865n,
+          interestPortion: 150000n,
+          principalPortion: 29865n,
+          extraPrincipal: 0n,
+          totalPrincipal: 29865n,
+          endingBalance: 29970135n,
+          escrow: 0n,
+          pmi: 0n,
+          hoa: 0n,
+          totalPayment: 179865n,
+          cumulativeInterest: 150000n,
+          cumulativePrincipal: 29865n
+        },
+        {
+          periodNumber: 2,
+          paymentDate: new Date('2026-03-01T00:00:00.000Z'),
+          beginningBalance: 29970135n,
+          scheduledPayment: 179865n,
+          interestPortion: 149851n,
+          principalPortion: 30014n,
+          extraPrincipal: 0n,
+          totalPrincipal: 30014n,
+          endingBalance: 29940121n,
+          escrow: 0n,
+          pmi: 0n,
+          hoa: 0n,
+          totalPayment: 179865n,
+          cumulativeInterest: 299851n,
+          cumulativePrincipal: 59879n
+        },
+        {
+          periodNumber: 3,
+          paymentDate: new Date('2026-04-01T00:00:00.000Z'),
+          beginningBalance: 29940121n,
+          scheduledPayment: 179865n,
+          interestPortion: 149701n,
+          principalPortion: 30164n,
+          extraPrincipal: 0n,
+          totalPrincipal: 30164n,
+          endingBalance: 29909957n,
+          escrow: 0n,
+          pmi: 0n,
+          hoa: 0n,
+          totalPayment: 179865n,
+          cumulativeInterest: 449552n,
+          cumulativePrincipal: 90043n
+        }
+      ],
+      summary: {
+        totalInterest: 34751544n,
+        totalPrincipal: 30000000n,
+        numberOfPayments: 360
       }
     }
   }

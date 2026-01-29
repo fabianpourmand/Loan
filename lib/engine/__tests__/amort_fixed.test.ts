@@ -44,11 +44,10 @@ describe('AmortFixed - Basic Schedule Generation', () => {
       expect(schedule.periods[i].scheduledPayment).toBe(schedule.scheduledPayment);
     }
 
-    // Final period may be different (smaller due to rounding)
+    // Final period may be different (adjusted to force payoff at termMonths)
     const finalPeriod = schedule.periods[schedule.periods.length - 1];
-    expect(
-      Money.isLessThanOrEqual(finalPeriod.scheduledPayment, schedule.scheduledPayment)
-    ).toBe(true);
+    // Final payment can be slightly larger or smaller to bring balance to exactly zero
+    expect(finalPeriod.endingBalance).toBe(Money.ZERO);
   });
 
   it('should have decreasing interest and increasing principal over time', () => {
@@ -437,6 +436,44 @@ describe('AmortFixed - Helper Functions', () => {
 
     const interestThrough24 = AmortFixed.getInterestPaidThrough(schedule, 24);
     expect(Money.isGreaterThan(interestThrough24, interestThrough12)).toBe(true);
+  });
+});
+
+describe('AmortFixed - Payoff Contract', () => {
+  it('should return exactly termMonths rows with zero ending balance in final period', () => {
+    // Contract test: amort_fixed must return exactly termMonths periods,
+    // with the last period adjusted to bring endingBalance to exactly zero.
+    // No extra spillover month should be generated.
+    const params: AmortFixed.LoanParameters = {
+      principal: 30000000n, // $300,000.00
+      annualRate: 0.06,
+      termMonths: 360,
+      firstPaymentDate: new Date('2026-02-01T00:00:00.000Z')
+    };
+
+    const schedule = AmortFixed.generateSchedule(params, STANDARD_MONTHLY);
+
+    // Contract: Must have exactly 360 periods (no extra month)
+    expect(schedule.periods.length).toBe(360);
+
+    // Contract: First period is period 1
+    expect(schedule.periods[0].periodNumber).toBe(1);
+
+    // Contract: Last period is period 360
+    expect(schedule.periods[359].periodNumber).toBe(360);
+
+    // Contract: Last payment date should be exactly 360 months from first payment
+    // First payment: 2026-02-01, so 360th payment: 2056-01-01
+    expect(schedule.periods[359].paymentDate.toISOString()).toBe(
+      '2056-01-01T00:00:00.000Z'
+    );
+
+    // Contract: Last period must have exactly zero ending balance
+    expect(schedule.periods[359].endingBalance).toBe(0n);
+
+    // Sanity: Last period should still have positive principal and non-negative interest
+    expect(schedule.periods[359].totalPrincipal).toBeGreaterThan(0n);
+    expect(schedule.periods[359].interestPortion).toBeGreaterThanOrEqual(0n);
   });
 });
 

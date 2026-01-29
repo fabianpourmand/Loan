@@ -178,19 +178,31 @@ export function generateSchedule(
   let cumulativePrincipal = Money.ZERO;
   let periodNumber = 1;
 
-  while (Money.isGreaterThan(currentBalance, Money.ZERO) && periodNumber <= params.termMonths * 2) {
+  // Contract: Generate exactly termMonths periods (or fewer if extra payments pay off early)
+  while (Money.isGreaterThan(currentBalance, Money.ZERO) && periodNumber <= params.termMonths) {
     // Calculate interest for this period
     const interest = Money.calculateInterest(currentBalance, params.annualRate, 12);
 
     // Get extra principal for this period
     const extraPrincipal = extraPaymentMap.get(periodNumber) || Money.ZERO;
 
-    // Determine actual payment amount (may be less than scheduled for final payment)
+    // Determine actual payment amount
     let actualPayment = scheduledPayment;
-    const totalOwed = Money.add(interest, currentBalance);
-    if (Money.isLessThan(totalOwed, scheduledPayment)) {
-      // Final payment: only pay what's needed
-      actualPayment = totalOwed;
+
+    // If this is the final period (termMonths), force payoff
+    if (periodNumber === params.termMonths) {
+      // Calculate exact payment needed to bring balance to zero
+      // Payment must cover interest plus remaining principal
+      const payoffAmount = Money.add(interest, currentBalance);
+      actualPayment = payoffAmount;
+    } else {
+      // For non-final periods, use regular scheduled payment
+      // unless loan would be paid off early (due to extra payments)
+      const totalOwed = Money.add(interest, currentBalance);
+      if (Money.isLessThan(totalOwed, scheduledPayment)) {
+        // Early payoff: only pay what's needed
+        actualPayment = totalOwed;
+      }
     }
 
     // Apply payment
