@@ -1,3 +1,12 @@
+---
+**OUTDATED - HISTORICAL DOCUMENT**
+
+This document describes a fix that was already applied. As of commit `dde0a16`, `npm test` shows 171 tests passing.
+
+For current status, see [Implementation_Plan_V6.md](Implementation_Plan_V6.md).
+
+---
+
 # Payment Application Accounting Fix
 
 ## Problem Identified

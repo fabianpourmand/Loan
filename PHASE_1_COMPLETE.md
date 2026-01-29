@@ -1,3 +1,13 @@
+---
+**OUTDATED - HISTORICAL DOCUMENT**
+
+This document is not authoritative. As of commit `dde0a16`, `npm test` shows 171 tests passing.
+Phase 1 is NOT complete until: amort_daily, calculator-backed golden cases, property tests, and CLI runner are done.
+
+For current status, see [Implementation_Plan_V6.md](Implementation_Plan_V6.md).
+
+---
+
 # Phase 1: Math Engine - COMPLETE ✅
 
 ## Summary

@@ -2,6 +2,20 @@
 
 Premium mortgage utility with statement match capability.
 
+## Current Status (dde0a16)
+
+**Tests:** 171 passing (npm test)
+
+**Phase 1 Status:** In progress. Core modules complete (money, dates, assumptions, payment_apply, amort_fixed, statement_match), but Phase 1 NOT complete until:
+- amort_daily.ts implemented
+- Real calculator-backed golden test cases (3+ sources)
+- Property tests (invariants)
+- CLI runner script
+
+See [Implementation_Plan_V6.md](Implementation_Plan_V6.md) for full tracking.
+
+---
+
 ## Phase 1: Math Engine + Tests
 
 This phase implements the core calculation engine with rigorous testing.
