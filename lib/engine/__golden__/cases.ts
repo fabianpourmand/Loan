@@ -288,7 +288,11 @@ export const GOLDEN_CASES: GoldenCase[] = [
   },
   {
     id: 'monthly_300k_6pct_30y_2026-01-01',
-    description: 'Calculator-backed: $300k at 6% for 30 years (verified against Calculator.net, Bankrate, MortgageCalculator.org on 2026-01-29)',
+    description: '$300k at 6% for 30 years - first 3 rows verified vs calculators; totals engine-derived; TODO re-verify totals',
+    // Sources for verification:
+    // - Calculator.net: first3Rows verified, captured 2026-01-29
+    // - Bankrate: first3Rows verified, captured 2026-01-29
+    // - MortgageCalculator.org: first3Rows verified, captured 2026-01-29
     loanParams: {
       principal: 30000000n, // $300,000.00
       annualRate: 0.06, // 6% APR
