@@ -5,6 +5,10 @@
 
 import type { Money } from './money';
 import * as Money from './money';
+import * as AmortFixed from './amort_fixed';
+import * as AmortDaily from './amort_daily';
+import type { LoanParameters, ExtraPayment, AmortizationSchedule } from './amort_fixed';
+import type { AssumptionSet } from './assumptions';
 
 /**
  * Match status result
@@ -47,6 +51,21 @@ export interface MatchDiagnostics {
   deltasByRow: RowDelta[];
   /** Human-readable notes */
   notes: string[];
+}
+
+/**
+ * Engine type for schedule generation
+ */
+export type EngineType = 'monthly' | 'daily';
+
+/**
+ * Options for schedule generation
+ */
+export interface GenerateScheduleOptions {
+  /** Engine to use for schedule generation (default: "monthly") */
+  engine?: EngineType;
+  /** Last payment date (required for daily engine) */
+  lastPaymentDate?: Date;
 }
 
 /**
@@ -292,4 +311,34 @@ export function matchStatement(
 
   diagnostics.notes.push('Deltas exceed tolerance');
   return { status: 'NO_MATCH', diagnostics };
+}
+
+/**
+ * Generate amortization schedule using specified engine
+ *
+ * @param params - Loan parameters
+ * @param assumptions - Assumption set
+ * @param extraPayments - Optional extra payment schedule
+ * @param options - Generation options (engine type, last payment date)
+ * @returns Complete amortization schedule
+ */
+export function generateScheduleForMatch(
+  params: LoanParameters,
+  assumptions: AssumptionSet,
+  extraPayments: ExtraPayment[] = [],
+  options?: GenerateScheduleOptions
+): AmortizationSchedule {
+  const engine = options?.engine ?? 'monthly';
+
+  if (engine === 'daily') {
+    return AmortDaily.generateSchedule(
+      params,
+      assumptions,
+      extraPayments,
+      options?.lastPaymentDate
+    );
+  }
+
+  // Default: monthly engine
+  return AmortFixed.generateSchedule(params, assumptions, extraPayments);
 }

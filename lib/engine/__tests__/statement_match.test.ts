@@ -1,6 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import * as StatementMatch from '../statement_match';
 import * as Money from '../money';
+import * as AmortFixed from '../amort_fixed';
+import * as AmortDaily from '../amort_daily';
+import type { AssumptionSet } from '../assumptions';
+import type { LoanParameters } from '../amort_fixed';
 
 describe('StatementMatch - Exact Match', () => {
   it('should return MATCH for exactly equal rows', () => {
@@ -460,5 +464,167 @@ describe('StatementMatch - Strict Missing Field Handling', () => {
 
     expect(result.status).toBe('MATCH');
     expect(result.diagnostics.notes).toContain('All fields match exactly');
+  });
+});
+
+describe('StatementMatch - Engine Support (Daily vs Monthly)', () => {
+  const MONTHLY_ASSUMPTIONS: AssumptionSet = {
+    name: 'Standard Monthly',
+    amortizationMethod: 'monthly',
+    dayCountBasis: 'actual/365',
+    paymentFrequency: 'monthly',
+    paymentApplicationOrder: 'standard',
+    includeEscrow: false,
+    includePMI: false,
+    includeHOA: false
+  };
+
+  const DAILY_ASSUMPTIONS: AssumptionSet = {
+    name: 'Daily Simple Interest',
+    amortizationMethod: 'daily',
+    dayCountBasis: 'actual/365',
+    paymentFrequency: 'monthly',
+    paymentApplicationOrder: 'standard',
+    includeEscrow: false,
+    includePMI: false,
+    includeHOA: false
+  };
+
+  it('should generate schedule using monthly engine by default (unchanged behavior)', () => {
+    const params: LoanParameters = {
+      principal: 100000n, // $1000.00
+      annualRate: 0.05, // 5%
+      termMonths: 12,
+      firstPaymentDate: new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    };
+
+    // Generate using wrapper with default engine
+    const scheduleFromWrapper = StatementMatch.generateScheduleForMatch(
+      params,
+      MONTHLY_ASSUMPTIONS
+    );
+
+    // Generate using amort_fixed directly
+    const scheduleFromFixed = AmortFixed.generateSchedule(params, MONTHLY_ASSUMPTIONS);
+
+    // Compare first 3 periods to ensure they match exactly
+    const wrapperRows = scheduleFromWrapper.periods.slice(0, 3);
+    const fixedRows = scheduleFromFixed.periods.slice(0, 3);
+
+    const matchResult = StatementMatch.matchStatement(fixedRows, wrapperRows);
+
+    expect(matchResult.status).toBe('MATCH');
+    expect(matchResult.diagnostics.deltasByRow).toHaveLength(0);
+  });
+
+  it('should generate schedule using monthly engine when explicitly specified', () => {
+    const params: LoanParameters = {
+      principal: 100000n,
+      annualRate: 0.05,
+      termMonths: 12,
+      firstPaymentDate: new Date(Date.UTC(2026, 0, 1, 0, 0, 0))
+    };
+
+    // Generate using wrapper with explicit monthly engine
+    const scheduleFromWrapper = StatementMatch.generateScheduleForMatch(
+      params,
+      MONTHLY_ASSUMPTIONS,
+      [],
+      { engine: 'monthly' }
+    );
+
+    // Generate using amort_fixed directly
+    const scheduleFromFixed = AmortFixed.generateSchedule(params, MONTHLY_ASSUMPTIONS);
+
+    // Compare first 3 periods
+    const wrapperRows = scheduleFromWrapper.periods.slice(0, 3);
+    const fixedRows = scheduleFromFixed.periods.slice(0, 3);
+
+    const matchResult = StatementMatch.matchStatement(fixedRows, wrapperRows);
+
+    expect(matchResult.status).toBe('MATCH');
+    expect(matchResult.diagnostics.notes).toContain('All fields match exactly');
+  });
+
+  it('should generate schedule using daily engine when specified (opt-in)', () => {
+    // Use simple numbers from amort_daily sanity test (Test A)
+    // Principal: $365.00, APR: 100%, 1 day between payments
+    // Expected interest: $365 * 1.0 * 1 / 365 = $1.00 exactly
+    const params: LoanParameters = {
+      principal: 36500n, // $365.00
+      annualRate: 1.0, // 100%
+      termMonths: 12,
+      firstPaymentDate: new Date(Date.UTC(2026, 0, 2, 0, 0, 0)) // 2026-01-02
+    };
+
+    const lastPaymentDate = new Date(Date.UTC(2026, 0, 1, 0, 0, 0)); // 2026-01-01
+
+    // Generate using wrapper with daily engine
+    const scheduleFromWrapper = StatementMatch.generateScheduleForMatch(
+      params,
+      DAILY_ASSUMPTIONS,
+      [],
+      { engine: 'daily', lastPaymentDate }
+    );
+
+    // Generate using amort_daily directly
+    const scheduleFromDaily = AmortDaily.generateSchedule(
+      params,
+      DAILY_ASSUMPTIONS,
+      [],
+      lastPaymentDate
+    );
+
+    // Compare first 3 periods (or all if less than 3)
+    const wrapperRows = scheduleFromWrapper.periods.slice(0, 3);
+    const dailyRows = scheduleFromDaily.periods.slice(0, 3);
+
+    const matchResult = StatementMatch.matchStatement(dailyRows, wrapperRows);
+
+    expect(matchResult.status).toBe('MATCH');
+    expect(matchResult.diagnostics.deltasByRow).toHaveLength(0);
+    expect(matchResult.diagnostics.notes).toContain('All fields match exactly');
+  });
+
+  it('should handle daily engine with realistic loan parameters', () => {
+    // More realistic daily accrual case
+    const params: LoanParameters = {
+      principal: 100000n, // $1000.00
+      annualRate: 0.10, // 10%
+      termMonths: 12,
+      firstPaymentDate: new Date(Date.UTC(2026, 1, 1, 0, 0, 0)) // 2026-02-01
+    };
+
+    const lastPaymentDate = new Date(Date.UTC(2026, 0, 2, 0, 0, 0)); // 2026-01-02
+
+    // Generate using wrapper with daily engine
+    const scheduleFromWrapper = StatementMatch.generateScheduleForMatch(
+      params,
+      DAILY_ASSUMPTIONS,
+      [],
+      { engine: 'daily', lastPaymentDate }
+    );
+
+    // Generate using amort_daily directly
+    const scheduleFromDaily = AmortDaily.generateSchedule(
+      params,
+      DAILY_ASSUMPTIONS,
+      [],
+      lastPaymentDate
+    );
+
+    // Compare all periods
+    const wrapperRows = scheduleFromWrapper.periods;
+    const dailyRows = scheduleFromDaily.periods;
+
+    const matchResult = StatementMatch.matchStatement(dailyRows, wrapperRows);
+
+    expect(matchResult.status).toBe('MATCH');
+    expect(matchResult.diagnostics.deltasByRow).toHaveLength(0);
+
+    // Verify the schedule is non-empty
+    expect(scheduleFromWrapper.periods.length).toBeGreaterThan(0);
+    expect(scheduleFromDaily.periods.length).toBeGreaterThan(0);
+    expect(scheduleFromWrapper.periods.length).toBe(scheduleFromDaily.periods.length);
   });
 });
