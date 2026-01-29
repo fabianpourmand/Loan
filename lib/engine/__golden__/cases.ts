@@ -288,11 +288,30 @@ export const GOLDEN_CASES: GoldenCase[] = [
   },
   {
     id: 'monthly_300k_6pct_30y_2026-01-01',
-    description: '$300k at 6% for 30 years - first 3 rows verified vs calculators; totals engine-derived; TODO re-verify totals',
-    // Sources for verification:
-    // - Calculator.net: first3Rows verified, captured 2026-01-29
-    // - Bankrate: first3Rows verified, captured 2026-01-29
-    // - MortgageCalculator.org: first3Rows verified, captured 2026-01-29
+    description: '$300k at 6% for 30 years - totals verified vs MortgageCalculator.org (rounded monthly payment with final payment adjustment); Calculator.net totals differ slightly due to internal unrounded payment; Bankrate rounds to whole dollars',
+    // Verification captures (2026-01-29):
+    // - Calculator.net (Amortization Calculator):
+    //   payment 1798.65
+    //   total_interest 347514.57
+    //   total_paid 647514.57
+    //   num_payments 360
+    // - Bankrate (Amortization Calculator; rounded to dollars):
+    //   payment 1799
+    //   total_interest 347515
+    //   total_paid 647515
+    //   num_payments 360
+    //   payoff Jan 2056
+    // - MortgageCalculator.org (Amortization Schedule):
+    //   payment 1798.65
+    //   total_interest 347515.44
+    //   total_paid 647515.44
+    //   num_payments 360
+    //   final_payment 1800.09 (principal 1791.13, interest 8.96)
+    // Notes:
+    // - Some calculators compute using an unrounded payment (1798.651575...) internally, then display 1798.65,
+    //   which explains the 0.87 difference vs Calculator.net totals.
+    // - Our engine uses cents-rounded scheduled payments each month and forces payoff in the final period,
+    //   matching MortgageCalculator.org totals exactly.
     loanParams: {
       principal: 30000000n, // $300,000.00
       annualRate: 0.06, // 6% APR
