@@ -7,6 +7,7 @@ import {
   Pressable,
   ScrollView,
   Switch,
+  Image,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -22,6 +23,10 @@ export default function ConfirmScreen() {
     fileName?: string;
     mimeType?: string;
     fileSize?: string;
+    imageUri?: string;
+    imageName?: string;
+    imageWidth?: string;
+    imageHeight?: string;
   }>();
   const router = useRouter();
 
@@ -61,7 +66,42 @@ export default function ConfirmScreen() {
         Review the extracted fields and adjust as needed
       </Text>
 
-      {params.fileUri && (
+      {params.imageUri && (
+        <View style={styles.fileInfo}>
+          <Text style={styles.fileInfoTitle}>Captured Photo</Text>
+          <Image
+            source={{ uri: params.imageUri }}
+            style={styles.imagePreview}
+            resizeMode="contain"
+          />
+          <Text style={styles.fileInfoText}>
+            <Text style={styles.fileInfoLabel}>Name: </Text>
+            {params.imageName || 'photo.jpg'}
+          </Text>
+          <Text style={styles.fileInfoText}>
+            <Text style={styles.fileInfoLabel}>Type: </Text>
+            {params.mimeType || 'image/jpeg'}
+          </Text>
+          {params.imageWidth && params.imageHeight && (
+            <Text style={styles.fileInfoText}>
+              <Text style={styles.fileInfoLabel}>Dimensions: </Text>
+              {params.imageWidth} x {params.imageHeight}
+            </Text>
+          )}
+          <Text style={styles.fileInfoText}>
+            <Text style={styles.fileInfoLabel}>URI: </Text>
+            {params.imageUri.length > 50
+              ? `...${params.imageUri.slice(-50)}`
+              : params.imageUri}
+          </Text>
+          <Text style={styles.extractionNote}>
+            Note: Extraction endpoint (A-03) not yet implemented. Fields below
+            show sample data.
+          </Text>
+        </View>
+      )}
+
+      {params.fileUri && !params.imageUri && (
         <View style={styles.fileInfo}>
           <Text style={styles.fileInfoTitle}>Selected File</Text>
           <Text style={styles.fileInfoText}>
@@ -303,5 +343,12 @@ const styles = StyleSheet.create({
     color: '#64748b',
     marginTop: 8,
     fontStyle: 'italic',
+  },
+  imagePreview: {
+    width: '100%',
+    height: 200,
+    borderRadius: 8,
+    marginBottom: 12,
+    backgroundColor: '#e5e7eb',
   },
 });

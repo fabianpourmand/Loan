@@ -47,10 +47,27 @@ apps/mobile/
 - [apps/mobile/app/confirm.tsx](apps/mobile/app/confirm.tsx) - Added file info display section
 - [apps/mobile/package.json](apps/mobile/package.json) - Added expo-document-picker dependency
 
+### A-01: Camera Capture (DONE ✅)
+**Completed:** 2026-01-30
+
+**What was created:**
+- Camera capture using expo-camera
+- Camera permission handling (iOS + Android)
+- "Take Photo" button in capture screen
+- Camera preview with Capture/Cancel controls
+- Photo preview + metadata in confirm screen (image preview, dimensions, URI)
+- All three input methods now functional: Camera, PDF picker, Sample statement
+
+**Files modified:**
+- [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx) - Added camera logic, permission handling, capture flow
+- [apps/mobile/app/confirm.tsx](apps/mobile/app/confirm.tsx) - Added image preview and metadata display
+- [apps/mobile/app.json](apps/mobile/app.json) - Added camera permissions (iOS NSCameraUsageDescription, Android CAMERA, expo-camera plugin)
+- [apps/mobile/package.json](apps/mobile/package.json) - Added expo-camera dependency
+
 **Next steps:**
-- **PH2-01/A-01:** Implement camera capture placeholder
 - **A-03:** Statement extraction endpoint (server-side Docling + OCRmyPDF; GPT fallback)
 - **A-04:** AsyncStorage persistence + validation
+- **P1-07:** Implement recast.ts (lump sum + payment reduction)
 
 ---
 

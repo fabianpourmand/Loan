@@ -24,11 +24,11 @@
 | App Architecture | DONE | TBD | 2026-01-30 | Expo + TypeScript + file-based routing scaffold complete |
 
 ### Current Focus (Phase 2 Priorities)
-1. **PH2-01/A-01** (TODO) – Photo capture placeholder implementation
-2. **A-03** (TODO) – Statement extraction endpoint stub (server-side Docling + OCRmyPDF; GPT fallback)
-3. **A-04** (TODO) – AsyncStorage persistence + validation
-4. **P1-07** (TODO) – Implement [recast.ts](lib/engine/recast.ts) (lump sum + payment reduction)
-5. **P1-08** (TODO) – Implement [refi.ts](lib/engine/refi.ts) (breakeven + cash flow analysis)
+1. **A-03** (TODO) – Statement extraction endpoint stub (server-side Docling + OCRmyPDF; GPT fallback)
+2. **A-04** (TODO) – AsyncStorage persistence + validation
+3. **P1-07** (TODO) – Implement [recast.ts](lib/engine/recast.ts) (lump sum + payment reduction)
+4. **P1-08** (TODO) – Implement [refi.ts](lib/engine/refi.ts) (breakeven + cash flow analysis)
+5. **P1-09** (TODO) – Implement [goal_seek.ts](lib/engine/goal_seek.ts) (binary search for extra payment)
 
 ---
 
@@ -98,11 +98,16 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + statement extract
 
 ### A) Snap & Solve (Input)
 
-- [ ] **A-01** (TODO) – Photo capture (statement) – [app/screens/CaptureScreen.tsx](app/screens/CaptureScreen.tsx)
+- [x] **A-01** (DONE) – Photo capture (statement) – [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx)
   - **Acceptance:**
-    - Camera access granted; user can snap statement photo
-    - Image saved temporarily for extraction
-    - Works on iOS & Android
+    - Camera access granted; user can snap statement photo ✅
+    - Image saved temporarily for extraction ✅
+    - Works on iOS & Android ✅
+    - Camera permissions configured (iOS + Android) ✅
+    - Photo metadata (URI, dimensions) passed to confirm screen ✅
+  - **Location:** [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx), [apps/mobile/app/confirm.tsx](apps/mobile/app/confirm.tsx), [apps/mobile/app.json](apps/mobile/app.json)
+  - **Completed:** 2026-01-30
+  - **Note:** Photo extraction via server-side pipeline (A-03) not yet implemented; currently shows sample data
 
 - [x] **A-02** (DONE) – PDF import (statement PDF) – [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx)
   - **Acceptance:**
@@ -599,8 +604,9 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + statement extract
 
 ### Phase 2: Intake + Confirm (TODO)
 
-- [ ] **PH2-01** (TODO) – Camera capture – [app/screens/CaptureScreen.tsx](app/screens/CaptureScreen.tsx)
-  - **Acceptance:** Camera access functional; user can snap statement photo
+- [x] **PH2-01** (DONE) – Camera capture – [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx)
+  - **Acceptance:** Camera access functional; user can snap statement photo ✅
+  - **Completed:** 2026-01-30
 - [x] **PH2-02** (DONE) – PDF import – [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx)
   - **Acceptance:** User can select PDF from device storage ✅
   - **Completed:** 2026-01-30
