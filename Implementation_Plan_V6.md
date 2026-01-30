@@ -24,11 +24,12 @@
 | App Architecture | IN PROGRESS | TBD | 2026-01-30 | ARCH-01 done; ARCH-04 service skeleton done; ARCH-04 mobile + ARCH-05 pending |
 
 ### Current Focus (Phase 2 Priorities)
-1. **A-03 Verification** (DOING) – Verify extraction API + mobile integration works end-to-end
+1. **A-03 Verification** (DONE) – Extraction API + mobile integration verified on physical iPhone ✅
 2. **A-04** (TODO) – Confirm screen validation + AsyncStorage persistence
-3. **P1-07** (TODO) – Implement [lib/engine/recast.ts](lib/engine/recast.ts) (lump sum + payment reduction)
-4. **P1-08** (TODO) – Implement [lib/engine/refi.ts](lib/engine/refi.ts) (breakeven + cash flow analysis)
-5. **P1-09** (TODO) – Implement [lib/engine/goal_seek.ts](lib/engine/goal_seek.ts) (binary search for extra payment)
+3. **OCR Quality** (DOING) – Address image-only PDF OCR and photo quality issues
+4. **P1-07** (TODO) – Implement [lib/engine/recast.ts](lib/engine/recast.ts) (lump sum + payment reduction)
+5. **P1-08** (TODO) – Implement [lib/engine/refi.ts](lib/engine/refi.ts) (breakeven + cash flow analysis)
+6. **P1-09** (TODO) – Implement [lib/engine/goal_seek.ts](lib/engine/goal_seek.ts) (binary search for extra payment)
 
 ---
 
