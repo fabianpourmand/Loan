@@ -1,0 +1,6 @@
+version: '3.8'
+
+services:
+  extraction-api:
+    environment:
+      - EXTRACT_DEBUG=1

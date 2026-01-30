@@ -1,0 +1,9 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+pypdf==4.0.1
+ocrmypdf==16.0.2
+pillow==10.1.0
+pytesseract==0.3.10
+python-dateutil==2.8.2
+regex==2023.12.25

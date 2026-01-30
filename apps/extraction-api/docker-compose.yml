@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  extraction-api:
+    build: .
+    ports:
+      - "8009:8009"
+    environment:
+      - PYTHONUNBUFFERED=1
+      # - EXTRACT_DEBUG=1  # Uncomment to include text_sample in debug output
+    volumes:
+      - ./app:/app/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8009 --reload

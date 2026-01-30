@@ -24,8 +24,6 @@ export default function CaptureScreen() {
       const file = result.assets[0];
       if (file) {
         // Navigate to confirm with file info
-        // Note: Extraction endpoint (A-03) not implemented yet
-        // For now, just show file info and use sample data
         router.push({
           pathname: '/confirm',
           params: {
@@ -33,13 +31,6 @@ export default function CaptureScreen() {
             fileName: file.name,
             mimeType: file.mimeType || 'application/pdf',
             fileSize: file.size?.toString() || '0',
-            // Include sample data for now (extraction placeholder)
-            principalBalance: '300000',
-            noteRate: '6.5',
-            scheduledPI: '1896.20',
-            escrow: '450.00',
-            nextDueDate: '2026-02-01',
-            maturityDate: '2056-01-01',
           },
         });
       }
@@ -76,8 +67,6 @@ export default function CaptureScreen() {
         setCameraMode(false);
 
         // Navigate to confirm with image info
-        // Note: Extraction endpoint (A-03) not implemented yet
-        // For now, just show image info and use sample data
         router.push({
           pathname: '/confirm',
           params: {
@@ -86,13 +75,6 @@ export default function CaptureScreen() {
             mimeType: 'image/jpeg',
             imageWidth: photo.width?.toString() || '0',
             imageHeight: photo.height?.toString() || '0',
-            // Include sample data for now (extraction placeholder)
-            principalBalance: '300000',
-            noteRate: '6.5',
-            scheduledPI: '1896.20',
-            escrow: '450.00',
-            nextDueDate: '2026-02-01',
-            maturityDate: '2056-01-01',
           },
         });
       }
@@ -164,8 +146,8 @@ export default function CaptureScreen() {
       </Pressable>
 
       <Text style={styles.note}>
-        Phase II: Camera capture (A-01) and PDF import (A-02) functional.
-        Extraction endpoint (A-03) coming next.
+        Phase II: Camera capture (A-01), PDF import (A-02), and extraction API
+        (A-03) integrated. Tap Extract on the confirm screen.
       </Text>
     </View>
   );

@@ -38,12 +38,38 @@ apps/mobile/
 - File-based routing with Expo Router
 - Three screens: Home → Capture → Confirm
 - Confirm screen with editable fields + assumption mode toggle
+- Camera capture (A-01) ✅
+- PDF import (A-02) ✅
+- Statement extraction API integration (A-03) ✅
 
 **PLACEHOLDERS (not implemented yet):**
-- Camera capture (PH2-01/A-01)
-- PDF import (A-02)
-- Statement extraction (A-03)
 - AsyncStorage persistence (A-04)
+
+## Extraction API Configuration
+
+The mobile app connects to the extraction API to process statement images/PDFs.
+
+**Local Development (Simulator/Emulator):**
+The default URL is `http://localhost:8009`. This works when testing on iOS Simulator or Android Emulator.
+
+**Physical Device Testing:**
+When testing on a physical phone, you need to set the extraction API URL to your machine's LAN IP:
+
+```bash
+# In apps/mobile directory, create/edit .env
+EXPO_PUBLIC_EXTRACT_URL=http://192.168.x.x:8009
+```
+
+Replace `192.168.x.x` with your machine's local IP address (find with `ipconfig` on Windows or `ifconfig` on Mac/Linux).
+
+**Starting the Extraction API:**
+```bash
+# From repo root
+cd apps/extraction-api
+docker-compose up
+```
+
+The API will be available at `http://localhost:8009`.
 
 ## TypeScript
 

@@ -8,8 +8,29 @@ import {
   ScrollView,
   Switch,
   Image,
+  ActivityIndicator,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+
+// Helper: Determine file type and name from URI
+function getFileInfo(uri: string, providedMimeType?: string): { name: string; type: string } {
+  const fileName = uri.split('/').pop() || `file_${Date.now()}`;
+
+  if (providedMimeType) {
+    return { name: fileName, type: providedMimeType };
+  }
+
+  // Fallback: infer from extension
+  if (uri.endsWith('.pdf')) {
+    return { name: fileName, type: 'application/pdf' };
+  } else if (uri.endsWith('.png')) {
+    return { name: fileName, type: 'image/png' };
+  } else if (uri.endsWith('.jpg') || uri.endsWith('.jpeg')) {
+    return { name: fileName, type: 'image/jpeg' };
+  }
+
+  return { name: fileName, type: 'image/jpeg' }; // Default fallback
+}
 
 export default function ConfirmScreen() {
   const params = useLocalSearchParams<{
@@ -44,6 +65,118 @@ export default function ConfirmScreen() {
   const [assumptionMode, setAssumptionMode] = useState<'monthly' | 'daily'>(
     'monthly'
   );
+
+  // Extraction state
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [extractError, setExtractError] = useState<string | null>(null);
+  // Number of fields extracted in last run (null = not run yet)
+  const [extractedCount, setExtractedCount] = useState<number | null>(null);
+
+  const handleExtract = async () => {
+    // Determine which URI to use (imageUri or fileUri)
+    const sourceUri = params.imageUri || params.fileUri;
+    if (!sourceUri) {
+      setExtractError('No file to extract from');
+      return;
+    }
+
+    setIsExtracting(true);
+    setExtractError(null);
+
+    try {
+      const { name, type } = getFileInfo(sourceUri, params.mimeType);
+
+      // Build FormData
+      const formData = new FormData();
+      formData.append('file', {
+        uri: sourceUri,
+        name,
+        type,
+      } as any);
+
+      // Get extraction API URL from env or default to localhost
+      const extractUrl =
+        process.env.EXPO_PUBLIC_EXTRACT_URL || 'http://localhost:8009';
+
+      const response = await fetch(`${extractUrl}/v1/extract`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Accept: 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Extraction failed: ${response.status} ${response.statusText}`);
+      }
+
+      const api = await response.json();
+      const apiFields = api?.fields ?? {};
+
+      const pickValue = (x: any) => {
+        if (typeof x === 'string') return x;
+        if (x && typeof x.value === 'string') return x.value;
+        return '';
+      };
+
+      const FIELD_MAP: Record<string, string> = {
+        principal_balance: 'principalBalance',
+        note_rate: 'noteRate',
+        scheduled_pi: 'scheduledPI',
+        escrow: 'escrow',
+        next_due_date: 'nextDueDate',
+        maturity_date: 'maturityDate',
+      };
+
+      let updated = 0;
+      const updates: Partial<Record<string, string>> = {};
+
+      for (const [apiKey, localKey] of Object.entries(FIELD_MAP)) {
+        const incoming = pickValue(apiFields[apiKey]).toString().trim();
+        if (!incoming) continue; // don't set blanks
+
+        // get existing value for localKey
+        const existing = String(
+          (localKey === 'principalBalance' ? principalBalance :
+            localKey === 'noteRate' ? noteRate :
+            localKey === 'scheduledPI' ? scheduledPI :
+            localKey === 'escrow' ? escrow :
+            localKey === 'nextDueDate' ? nextDueDate :
+            localKey === 'maturityDate' ? maturityDate : '') ?? ''
+        ).trim();
+
+        if (existing) continue; // don't overwrite user edits
+
+        updates[localKey] = incoming;
+        updated++;
+      }
+
+      // Apply updates once
+      if (updates.principalBalance) setPrincipalBalance(updates.principalBalance);
+      if (updates.noteRate) setNoteRate(updates.noteRate);
+      if (updates.scheduledPI) setScheduledPI(updates.scheduledPI);
+      if (updates.escrow) setEscrow(updates.escrow);
+      if (updates.nextDueDate) setNextDueDate(updates.nextDueDate);
+      if (updates.maturityDate) setMaturityDate(updates.maturityDate);
+
+      // Update extract status
+      setExtractedCount(updated);
+      if (updated === 0) {
+        setExtractError('No fields extracted');
+      } else {
+        setExtractError(null);
+      }
+
+      console.log('Extraction successful:', api);
+    } catch (error) {
+      console.error('Extraction error:', error);
+      setExtractError(
+        error instanceof Error ? error.message : 'Failed to extract fields'
+      );
+    } finally {
+      setIsExtracting(false);
+    }
+  };
 
   const handleContinue = () => {
     // Phase II placeholder: Would save to AsyncStorage here
@@ -94,10 +227,28 @@ export default function ConfirmScreen() {
               ? `...${params.imageUri.slice(-50)}`
               : params.imageUri}
           </Text>
-          <Text style={styles.extractionNote}>
-            Note: Extraction endpoint (A-03) not yet implemented. Fields below
-            show sample data.
-          </Text>
+
+          <Pressable
+            style={[styles.extractButton, isExtracting && styles.extractButtonDisabled]}
+            onPress={handleExtract}
+            disabled={isExtracting}
+          >
+            {isExtracting ? (
+              <View style={styles.extractButtonContent}>
+                <ActivityIndicator size="small" color="#fff" />
+                <Text style={styles.extractButtonText}>Extracting...</Text>
+              </View>
+            ) : (
+              <Text style={styles.extractButtonText}>Extract Fields</Text>
+            )}
+          </Pressable>
+
+          {extractError && (
+            <Text style={styles.errorText}>{extractError}</Text>
+          )}
+          {extractedCount !== null && (
+            <Text style={styles.extractionSuccess}>{`Extracted ${extractedCount} fields`}</Text>
+          )}
         </View>
       )}
 
@@ -122,10 +273,28 @@ export default function ConfirmScreen() {
               ? `...${params.fileUri.slice(-50)}`
               : params.fileUri}
           </Text>
-          <Text style={styles.extractionNote}>
-            Note: Extraction endpoint (A-03) not yet implemented. Fields below
-            show sample data.
-          </Text>
+
+          <Pressable
+            style={[styles.extractButton, isExtracting && styles.extractButtonDisabled]}
+            onPress={handleExtract}
+            disabled={isExtracting}
+          >
+            {isExtracting ? (
+              <View style={styles.extractButtonContent}>
+                <ActivityIndicator size="small" color="#fff" />
+                <Text style={styles.extractButtonText}>Extracting...</Text>
+              </View>
+            ) : (
+              <Text style={styles.extractButtonText}>Extract Fields</Text>
+            )}
+          </Pressable>
+
+          {extractError && (
+            <Text style={styles.errorText}>{extractError}</Text>
+          )}
+          {extractedCount !== null && (
+            <Text style={styles.extractionSuccess}>{`Extracted ${extractedCount} fields`}</Text>
+          )}
         </View>
       )}
 
@@ -344,11 +513,43 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontStyle: 'italic',
   },
+  extractionSuccess: {
+    fontSize: 13,
+    color: '#065f46',
+    marginTop: 8,
+    fontWeight: '600',
+  },
   imagePreview: {
     width: '100%',
     height: 200,
     borderRadius: 8,
     marginBottom: 12,
     backgroundColor: '#e5e7eb',
+  },
+  extractButton: {
+    backgroundColor: '#10b981',
+    paddingVertical: 12,
+    borderRadius: 6,
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  extractButtonDisabled: {
+    backgroundColor: '#9ca3af',
+  },
+  extractButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  extractButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 13,
+    marginTop: 8,
+    fontWeight: '500',
   },
 });

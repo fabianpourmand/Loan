@@ -42,7 +42,8 @@
         {
           "cameraPermission": "Allow Loanalize to access your camera to capture mortgage statement photos."
         }
-      ]
+      ],
+      "expo-asset"
     ]
   }
 }
