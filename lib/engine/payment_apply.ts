@@ -3,7 +3,6 @@
  * Determines how payments are split between interest, principal, escrow, fees
  */
 
-import type { Money } from './money';
 import * as Money from './money';
 import type { AssumptionSet } from './assumptions';
 
@@ -12,17 +11,17 @@ import type { AssumptionSet } from './assumptions';
  */
 export interface PaymentComponents {
   /** Scheduled payment amount (P&I only) */
-  scheduledPayment: Money;
+  scheduledPayment: Money.Money;
   /** Extra principal payment (optional) */
-  extraPrincipal?: Money;
+  extraPrincipal?: Money.Money;
   /** Escrow payment (optional) */
-  escrow?: Money;
+  escrow?: Money.Money;
   /** PMI payment (optional) */
-  pmi?: Money;
+  pmi?: Money.Money;
   /** HOA payment (optional) */
-  hoa?: Money;
+  hoa?: Money.Money;
   /** Late fees or other charges (optional) */
-  fees?: Money;
+  fees?: Money.Money;
 }
 
 /**
@@ -30,34 +29,34 @@ export interface PaymentComponents {
  */
 export interface PaymentBreakdown {
   /** Total payment amount */
-  totalPayment: Money;
+  totalPayment: Money.Money;
 
   /** Amount applied to interest */
-  interestPortion: Money;
+  interestPortion: Money.Money;
 
   /** Amount applied to principal */
-  principalPortion: Money;
+  principalPortion: Money.Money;
 
   /** Amount applied to extra principal */
-  extraPrincipalPortion: Money;
+  extraPrincipalPortion: Money.Money;
 
   /** Amount applied to escrow */
-  escrowPortion: Money;
+  escrowPortion: Money.Money;
 
   /** Amount applied to PMI */
-  pmiPortion: Money;
+  pmiPortion: Money.Money;
 
   /** Amount applied to HOA */
-  hoaPortion: Money;
+  hoaPortion: Money.Money;
 
   /** Amount applied to fees */
-  feesPortion: Money;
+  feesPortion: Money.Money;
 
   /** Remaining payment amount (should be 0 if fully applied) */
-  remaining: Money;
+  remaining: Money.Money;
 
   /** New principal balance after this payment */
-  newBalance: Money;
+  newBalance: Money.Money;
 
   /** Whether this was a partial payment (didn't cover interest) */
   isPartialPayment: boolean;
@@ -68,10 +67,10 @@ export interface PaymentBreakdown {
  */
 export interface LoanState {
   /** Current principal balance */
-  balance: Money;
+  balance: Money.Money;
 
   /** Interest accrued since last payment */
-  accruedInterest: Money;
+  accruedInterest: Money.Money;
 }
 
 /**
@@ -232,10 +231,10 @@ export function applyPayment(
  * @returns Monthly payment amount
  */
 export function calculateScheduledPayment(
-  principal: Money,
+  principal: Money.Money,
   annualRate: number,
   numberOfPayments: number
-): Money {
+): Money.Money {
   if (numberOfPayments <= 0) {
     throw new Error('Number of payments must be positive');
   }

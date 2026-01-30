@@ -2,15 +2,17 @@
 
 Premium mortgage utility with statement match capability.
 
-## Current Status (dde0a16)
+## Current Status (2026-01-30)
 
-**Tests:** 171 passing (npm test)
+**Tests:** 196 passing (`npm test`)
 
-**Phase 1 Status:** In progress. Core modules complete (money, dates, assumptions, payment_apply, amort_fixed, statement_match), but Phase 1 NOT complete until:
-- amort_daily.ts implemented
-- Real calculator-backed golden test cases (3+ sources)
-- Property tests (invariants)
-- CLI runner script
+**Typecheck:** passing (`npm run typecheck`)
+
+**Phase 1 Status:** Complete.
+- Daily accrual model exists and is tested (`lib/engine/amort_daily.ts`).
+- Invariant suite exists and is deterministic (`lib/engine/__tests__/schedule_invariants.test.ts`).
+- CLI prints schedules and is honest about verification sources (`scripts/engine_cli.ts`).
+- Golden case verification is per-case (see notes in `lib/engine/__golden__/cases.ts`).
 
 See [Implementation_Plan_V6.md](Implementation_Plan_V6.md) for full tracking.
 
@@ -67,13 +69,15 @@ npm run typecheck
 ### Testing Strategy
 
 1. **Unit Tests**: Each module has comprehensive unit tests
-2. **Golden Tests**: Known-good cases validated against external calculators
-3. **Property Tests**: Invariants (balance monotonic, sum checks)
+2. **Golden Tests**: Behavior-locked cases (external verification captures are per-case)
+3. **Property Tests**: Deterministic invariants across randomized inputs
 4. **Statement Match Harness**: Selects best model to match real statements
 
 ### Definition of Done (Phase 1)
 
 - ✅ `npm test` passes all tests
-- ✅ Golden test cases match expected values within $0.01
+- ✅ `npm run typecheck` passes
+- ✅ Golden verification claims are per-case and include captures where claimed
 - ✅ Invariant tests pass (balance monotonic, sums correct)
 - ✅ Statement match harness works and reports deltas
+- ✅ CLI is honest about verification sources

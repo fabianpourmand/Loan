@@ -193,7 +193,9 @@ function main() {
   );
 
   console.log(`Loaded ${goldenData.cases.length} golden test cases`);
-  console.log(`Source: ${goldenData.source}\n`);
+  console.log(
+    'Source: lib/engine/__golden__/cases.ts (see per-case notes for verification captures)\n'
+  );
 
   // Run all golden tests
   const results: { id: string; pass: boolean }[] = [];

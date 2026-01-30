@@ -17,7 +17,8 @@ const DAILY_ASSUMPTIONS: AssumptionSet = {
   paymentApplicationOrder: 'standard',
   includeEscrow: false,
   includePMI: false,
-  includeHOA: false
+  includeHOA: false,
+  roundingMethod: 'nearest'
 };
 
 describe('amort_daily', () => {

@@ -476,7 +476,8 @@ describe('StatementMatch - Engine Support (Daily vs Monthly)', () => {
     paymentApplicationOrder: 'standard',
     includeEscrow: false,
     includePMI: false,
-    includeHOA: false
+    includeHOA: false,
+    roundingMethod: 'nearest'
   };
 
   const DAILY_ASSUMPTIONS: AssumptionSet = {
@@ -487,7 +488,8 @@ describe('StatementMatch - Engine Support (Daily vs Monthly)', () => {
     paymentApplicationOrder: 'standard',
     includeEscrow: false,
     includePMI: false,
-    includeHOA: false
+    includeHOA: false,
+    roundingMethod: 'nearest'
   };
 
   it('should generate schedule using monthly engine by default (unchanged behavior)', () => {

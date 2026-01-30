@@ -1,6 +1,6 @@
 {
-  "description": "Golden test cases for mortgage calculations - validated against external calculators",
-  "source": "Verified with Bankrate.com, Calculator.net, and standard mortgage formulas",
+  "description": "Golden test cases for mortgage calculations",
+  "source": "lib/engine/__golden__/cases.ts (see per-case notes for verification captures)",
   "cases": [
     {
       "id": "standard-30yr-300k",

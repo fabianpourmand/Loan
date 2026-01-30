@@ -3,7 +3,6 @@
  * Compares engine-generated schedule to lender statement data
  */
 
-import type { Money } from './money';
 import * as Money from './money';
 import * as AmortFixed from './amort_fixed';
 import * as AmortDaily from './amort_daily';
@@ -34,7 +33,7 @@ export interface RowDelta {
   /** Row index (0-indexed) */
   rowIndex: number;
   /** Field deltas (only non-zero deltas included) */
-  deltas: Record<string, Money>;
+  deltas: Record<string, Money.Money>;
 }
 
 /**
@@ -46,7 +45,7 @@ export interface MatchDiagnostics {
   /** Actual row count */
   rowCountActual: number;
   /** Maximum absolute delta by field name */
-  maxAbsDeltaByField: Record<string, Money>;
+  maxAbsDeltaByField: Record<string, Money.Money>;
   /** First N rows with non-zero deltas */
   deltasByRow: RowDelta[];
   /** Human-readable notes */
@@ -77,37 +76,39 @@ export interface StatementRow {
   /** Payment date */
   paymentDate?: Date;
   /** Beginning balance */
-  beginningBalance?: Money;
+  beginningBalance?: Money.Money;
   /** Scheduled payment (P&I only) */
-  scheduledPayment?: Money;
+  scheduledPayment?: Money.Money;
   /** Interest portion */
-  interestPortion?: Money;
+  interestPortion?: Money.Money;
   /** Principal portion */
-  principalPortion?: Money;
+  principalPortion?: Money.Money;
   /** Extra principal */
-  extraPrincipal?: Money;
+  extraPrincipal?: Money.Money;
   /** Total principal */
-  totalPrincipal?: Money;
+  totalPrincipal?: Money.Money;
   /** Ending balance */
-  endingBalance?: Money;
+  endingBalance?: Money.Money;
   /** Escrow */
-  escrow?: Money;
+  escrow?: Money.Money;
   /** PMI */
-  pmi?: Money;
+  pmi?: Money.Money;
   /** HOA */
-  hoa?: Money;
+  hoa?: Money.Money;
   /** Total payment */
-  totalPayment?: Money;
+  totalPayment?: Money.Money;
   /** Cumulative interest */
-  cumulativeInterest?: Money;
+  cumulativeInterest?: Money.Money;
   /** Cumulative principal */
-  cumulativePrincipal?: Money;
+  cumulativePrincipal?: Money.Money;
 }
 
 /**
  * Money field names to compare
  */
-const MONEY_FIELDS: (keyof StatementRow)[] = [
+type MoneyFieldName = Exclude<keyof StatementRow, 'periodNumber' | 'paymentDate'>;
+
+const MONEY_FIELDS: MoneyFieldName[] = [
   'beginningBalance',
   'scheduledPayment',
   'interestPortion',
@@ -159,7 +160,7 @@ export function matchStatement(
   }
 
   // Compare rows
-  const maxAbsDelta: Record<string, Money> = {};
+  const maxAbsDelta: Record<string, Money.Money> = {};
   const rowDeltas: RowDelta[] = [];
   let hasDateMismatch = false;
   let hasMissingFieldMismatch = false;
@@ -169,7 +170,7 @@ export function matchStatement(
   for (let i = 0; i < expectedRows.length; i++) {
     const expected = expectedRows[i];
     const actual = actualRows[i];
-    const deltas: Record<string, Money> = {};
+    const deltas: Record<string, Money.Money> = {};
 
     // Check dates
     const expHasDate = expected.paymentDate !== undefined && expected.paymentDate !== null;

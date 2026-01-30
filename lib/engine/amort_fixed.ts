@@ -3,7 +3,6 @@
  * Standard mortgage calculation method (most common)
  */
 
-import type { Money } from './money';
 import * as Money from './money';
 import * as Dates from './dates';
 import type { AssumptionSet } from './assumptions';
@@ -14,7 +13,7 @@ import * as PaymentApply from './payment_apply';
  */
 export interface LoanParameters {
   /** Initial principal balance */
-  principal: Money;
+  principal: Money.Money;
 
   /** Annual interest rate (as decimal, e.g., 0.065 for 6.5%) */
   annualRate: number;
@@ -26,13 +25,13 @@ export interface LoanParameters {
   firstPaymentDate: Date;
 
   /** Monthly escrow amount (optional) */
-  escrow?: Money;
+  escrow?: Money.Money;
 
   /** Monthly PMI amount (optional) */
-  pmi?: Money;
+  pmi?: Money.Money;
 
   /** Monthly HOA amount (optional) */
-  hoa?: Money;
+  hoa?: Money.Money;
 }
 
 /**
@@ -44,7 +43,7 @@ export interface ExtraPayment {
   paymentNumber: number;
 
   /** Extra principal amount */
-  amount: Money;
+  amount: Money.Money;
 }
 
 /**
@@ -58,43 +57,43 @@ export interface AmortizationPeriod {
   paymentDate: Date;
 
   /** Beginning balance for this period */
-  beginningBalance: Money;
+  beginningBalance: Money.Money;
 
   /** Scheduled payment amount (P&I only) */
-  scheduledPayment: Money;
+  scheduledPayment: Money.Money;
 
   /** Interest portion */
-  interestPortion: Money;
+  interestPortion: Money.Money;
 
   /** Principal portion */
-  principalPortion: Money;
+  principalPortion: Money.Money;
 
   /** Extra principal payment (if any) */
-  extraPrincipal: Money;
+  extraPrincipal: Money.Money;
 
   /** Total principal paid this period */
-  totalPrincipal: Money;
+  totalPrincipal: Money.Money;
 
   /** Ending balance after this payment */
-  endingBalance: Money;
+  endingBalance: Money.Money;
 
   /** Escrow portion (if included) */
-  escrow: Money;
+  escrow: Money.Money;
 
   /** PMI portion (if included) */
-  pmi: Money;
+  pmi: Money.Money;
 
   /** HOA portion (if included) */
-  hoa: Money;
+  hoa: Money.Money;
 
   /** Total payment (including escrow, PMI, HOA) */
-  totalPayment: Money;
+  totalPayment: Money.Money;
 
   /** Cumulative interest paid through this period */
-  cumulativeInterest: Money;
+  cumulativeInterest: Money.Money;
 
   /** Cumulative principal paid through this period */
-  cumulativePrincipal: Money;
+  cumulativePrincipal: Money.Money;
 }
 
 /**
@@ -108,7 +107,7 @@ export interface AmortizationSchedule {
   assumptions: AssumptionSet;
 
   /** Scheduled payment amount */
-  scheduledPayment: Money;
+  scheduledPayment: Money.Money;
 
   /** All periods in the schedule */
   periods: AmortizationPeriod[];
@@ -116,16 +115,16 @@ export interface AmortizationSchedule {
   /** Summary statistics */
   summary: {
     /** Total interest paid over life of loan */
-    totalInterest: Money;
+    totalInterest: Money.Money;
 
     /** Total principal paid (should equal initial principal) */
-    totalPrincipal: Money;
+    totalPrincipal: Money.Money;
 
     /** Total payments (P&I only) */
-    totalPayments: Money;
+    totalPayments: Money.Money;
 
     /** Total paid including escrow, PMI, HOA */
-    totalPaidWithEscrow: Money;
+    totalPaidWithEscrow: Money.Money;
 
     /** Number of payments to payoff */
     numberOfPayments: number;
@@ -165,7 +164,7 @@ export function generateSchedule(
   );
 
   // Build extra payment lookup
-  const extraPaymentMap = new Map<number, Money>();
+  const extraPaymentMap = new Map<number, Money.Money>();
   extraPayments.forEach((ep) => {
     extraPaymentMap.set(ep.paymentNumber, ep.amount);
   });
@@ -320,7 +319,7 @@ export function getPeriod(
 export function getBalanceAtPeriod(
   schedule: AmortizationSchedule,
   periodNumber: number
-): Money {
+): Money.Money {
   const period = getPeriod(schedule, periodNumber);
   return period ? period.endingBalance : Money.ZERO;
 }
@@ -331,7 +330,7 @@ export function getBalanceAtPeriod(
 export function getInterestPaidThrough(
   schedule: AmortizationSchedule,
   periodNumber: number
-): Money {
+): Money.Money {
   const period = getPeriod(schedule, periodNumber);
   return period ? period.cumulativeInterest : Money.ZERO;
 }

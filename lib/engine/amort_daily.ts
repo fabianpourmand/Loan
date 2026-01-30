@@ -3,7 +3,6 @@
  * Interest accrues daily; payment date affects interest calculation
  */
 
-import type { Money } from './money';
 import * as Money from './money';
 import * as Dates from './dates';
 import type { AssumptionSet } from './assumptions';
@@ -59,7 +58,7 @@ export function generateSchedule(
   );
 
   // Build extra payment lookup
-  const extraPaymentMap = new Map<number, Money>();
+  const extraPaymentMap = new Map<number, Money.Money>();
   extraPayments.forEach((ep) => {
     extraPaymentMap.set(ep.paymentNumber, ep.amount);
   });
@@ -215,7 +214,7 @@ export function getPeriod(
 export function getBalanceAtPeriod(
   schedule: AmortizationSchedule,
   periodNumber: number
-): Money {
+): Money.Money {
   const period = getPeriod(schedule, periodNumber);
   return period ? period.endingBalance : Money.ZERO;
 }
@@ -226,7 +225,7 @@ export function getBalanceAtPeriod(
 export function getInterestPaidThrough(
   schedule: AmortizationSchedule,
   periodNumber: number
-): Money {
+): Money.Money {
   const period = getPeriod(schedule, periodNumber);
   return period ? period.cumulativeInterest : Money.ZERO;
 }

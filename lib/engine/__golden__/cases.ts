@@ -3,7 +3,6 @@
  * These cases lock in expected behavior over time
  */
 
-import type { Money } from '../money';
 import * as Money from '../money';
 import type { LoanParameters, ExtraPayment } from '../amort_fixed';
 import type { AssumptionSet } from '../assumptions';
@@ -15,27 +14,27 @@ import * as Assumptions from '../assumptions';
 export interface ExpectedRow {
   periodNumber: number;
   paymentDate: Date;
-  beginningBalance: Money;
-  scheduledPayment: Money;
-  interestPortion: Money;
-  principalPortion: Money;
-  extraPrincipal: Money;
-  totalPrincipal: Money;
-  endingBalance: Money;
-  escrow: Money;
-  pmi: Money;
-  hoa: Money;
-  totalPayment: Money;
-  cumulativeInterest: Money;
-  cumulativePrincipal: Money;
+  beginningBalance: Money.Money;
+  scheduledPayment: Money.Money;
+  interestPortion: Money.Money;
+  principalPortion: Money.Money;
+  extraPrincipal: Money.Money;
+  totalPrincipal: Money.Money;
+  endingBalance: Money.Money;
+  escrow: Money.Money;
+  pmi: Money.Money;
+  hoa: Money.Money;
+  totalPayment: Money.Money;
+  cumulativeInterest: Money.Money;
+  cumulativePrincipal: Money.Money;
 }
 
 /**
  * Expected summary totals
  */
 export interface ExpectedSummary {
-  totalInterest: Money;
-  totalPrincipal: Money;
+  totalInterest: Money.Money;
+  totalPrincipal: Money.Money;
   numberOfPayments: number;
 }
 
