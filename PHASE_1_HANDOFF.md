@@ -1,7 +1,56 @@
 # Phase 1 → Phase 2 Handoff Document
 
 **Date:** 2026-01-30
-**Status:** Phase 1 COMPLETE ✅ | Phase 2 READY TO START
+**Status:** Phase 1 COMPLETE ✅ | Phase 2 IN PROGRESS
+
+---
+
+## Phase 2 Progress
+
+### ARCH-01: Expo + TypeScript Setup (DONE ✅)
+**Completed:** 2026-01-30
+
+**What was created:**
+- Expo app at `apps/mobile/` with TypeScript strict mode
+- File-based routing with Expo Router (Stack navigation)
+- Three screens wired: Home → Capture → Confirm
+- Confirm screen with editable fields for all loan parameters
+- Assumption mode toggle (monthly vs daily)
+
+**Location:** [apps/mobile/](apps/mobile/)
+
+**Structure:**
+```
+apps/mobile/
+├── app/
+│   ├── _layout.tsx   # Stack layout
+│   ├── index.tsx     # Home (Start button)
+│   ├── capture.tsx   # Capture placeholder (Use sample statement button)
+│   └── confirm.tsx   # Confirm/edit form (principalBalance, noteRate, scheduledPI, escrow, nextDueDate, maturityDate, assumptionMode)
+├── app.json          # Expo config
+├── package.json      # Dependencies (Expo ~52.0.0, expo-router ~4.0.0)
+├── tsconfig.json     # TypeScript strict mode ON
+└── README.md         # Setup instructions
+```
+
+### A-02: PDF Import (DONE ✅)
+**Completed:** 2026-01-30
+
+**What was created:**
+- PDF picker using expo-document-picker
+- "Pick PDF" button in capture screen
+- File info display in confirm screen (name, type, size, URI)
+- Sample data flow maintained (extraction endpoint not yet implemented)
+
+**Files modified:**
+- [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx) - Added PDF picker logic
+- [apps/mobile/app/confirm.tsx](apps/mobile/app/confirm.tsx) - Added file info display section
+- [apps/mobile/package.json](apps/mobile/package.json) - Added expo-document-picker dependency
+
+**Next steps:**
+- **PH2-01/A-01:** Implement camera capture placeholder
+- **A-03:** Statement extraction endpoint (server-side Docling + OCRmyPDF; GPT fallback)
+- **A-04:** AsyncStorage persistence + validation
 
 ---
 
@@ -170,7 +219,7 @@ These can be built incrementally as features are needed.
 - [ ] Configure AsyncStorage for persistence
 - [ ] Set up camera permissions (iOS + Android)
 - [ ] Create photo capture screen
-- [ ] Integrate GPT-4o Vision API
+- [ ] Integrate statement extraction endpoint (Option A pipeline: Docling + OCRmyPDF; GPT fallback)
 - [ ] Build confirm/edit screen with assumption selector
 
 ### Phase 2 Reference Files
@@ -243,8 +292,8 @@ They will be built incrementally as UI features require them.
 ### Architecture Decisions Needed
 1. **Expo SDK Version** - Which version to use? (Latest stable recommended)
 2. **Navigation Library** - Expo Router (file-based) or React Navigation?
-3. **GPT-4o API Key Storage** - Environment variables + secure storage strategy?
-4. **Statement Photo Storage** - Immediate deletion after extraction? (Privacy critical)
+3. **Extraction Service** - Where does extraction run (server-side) and how does mobile auth to it?
+4. **Statement Photo Storage** - Raw docs deleted immediately after extraction completes (Privacy critical)
 
 ### UI/UX Decisions Needed
 1. **Assumption selector UI** - Drawer, modal, or inline?

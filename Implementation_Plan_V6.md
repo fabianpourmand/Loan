@@ -21,14 +21,14 @@
 | Control Panel (UI) | TODO | TBD | - | Depends on goal_seek.ts completion |
 | Recast/Refi (UI) | TODO | TBD | - | Depends on recast.ts + refi.ts completion |
 | Export/Share | TODO | TBD | - | Awaiting Phase 4 |
-| App Architecture | TODO | TBD | - | Expo setup pending |
+| App Architecture | DONE | TBD | 2026-01-30 | Expo + TypeScript + file-based routing scaffold complete |
 
 ### Current Focus (Phase 2 Priorities)
-1. **A-01 to A-04** (TODO) – Photo capture + GPT-4o extraction + confirm screen
-2. **ARCH-01** (TODO) – Expo + TypeScript setup with navigation
-3. **P1-07** (TODO) – Implement [recast.ts](lib/engine/recast.ts) (lump sum + payment reduction)
-4. **P1-08** (TODO) – Implement [refi.ts](lib/engine/refi.ts) (breakeven + cash flow analysis)
-5. **P1-09** (TODO) – Implement [goal_seek.ts](lib/engine/goal_seek.ts) (binary search for extra payment)
+1. **PH2-01/A-01** (TODO) – Photo capture placeholder implementation
+2. **A-03** (TODO) – Statement extraction endpoint stub (server-side Docling + OCRmyPDF; GPT fallback)
+3. **A-04** (TODO) – AsyncStorage persistence + validation
+4. **P1-07** (TODO) – Implement [recast.ts](lib/engine/recast.ts) (lump sum + payment reduction)
+5. **P1-08** (TODO) – Implement [refi.ts](lib/engine/refi.ts) (breakeven + cash flow analysis)
 
 ---
 
@@ -90,7 +90,7 @@ Build Loanalize as the "premium mortgage utility" that users trust because it ca
 Core loop remains: Snap & Solve -> Freedom Control Panel -> Scenarios -> Export.
 New wedge: Statement Match Mode (Trust Mode).
 
-Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision extraction) [Project Brief Jan 2026]
+Source: V5 concept and stack. (Expo + TS + Victory Native XL + statement extraction pipeline) [Project Brief Jan 2026]
 
 ---
 
@@ -104,17 +104,21 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision ext
     - Image saved temporarily for extraction
     - Works on iOS & Android
 
-- [ ] **A-02** (TODO) – PDF import (statement PDF) – [app/screens/CaptureScreen.tsx](app/screens/CaptureScreen.tsx)
+- [x] **A-02** (DONE) – PDF import (statement PDF) – [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx)
   - **Acceptance:**
-    - User can select PDF from device storage
-    - PDF converted to image for GPT-4o Vision
-    - Supports multi-page PDFs (first page extracted)
+    - User can select PDF from device storage ✅
+    - PDF file info (URI, name, type, size) passed to confirm screen ✅
+    - File picker uses expo-document-picker with PDF filter ✅
+  - **Location:** [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx), [apps/mobile/app/confirm.tsx](apps/mobile/app/confirm.tsx)
+  - **Completed:** 2026-01-30
+  - **Note:** PDF extraction via server-side pipeline (A-03) not yet implemented; currently shows sample data
 
-- [ ] **A-03** (TODO) – GPT-4o Vision extraction – [lib/extraction/gpt_vision.ts](lib/extraction/gpt_vision.ts)
+- [ ] **A-03** (TODO) – Statement extraction pipeline (Docling + OCRmyPDF; GPT fallback) – [lib/extraction/statement_extract.ts](lib/extraction/statement_extract.ts)
   - **Acceptance:**
     - Extracts: principal balance, note rate, scheduled P&I, escrow (optional), next due date, maturity date (if present)
+    - Returns structured JSON + per-field confidence + provenance (source: pdf_text, ocr_text, or llm_fallback)
+    - LLM fallback only triggers when confidence is below threshold
     - Extraction accuracy >90% on 5+ different statement formats
-    - Returns structured JSON with confidence scores
 
 - [ ] **A-04** (TODO) – Confirm screen (user edits fields) – [app/screens/ConfirmScreen.tsx](app/screens/ConfirmScreen.tsx)
   - **Acceptance:**
@@ -124,8 +128,8 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision ext
     - "Continue" button saves LoanProfile to AsyncStorage
 
 **Notes/Risks:**
-- GPT-4o API costs per extraction (~$0.01-0.05 per image)
-- Privacy: raw statement image must be deleted immediately after extraction
+- OCR and parsing latency; GPT costs only on fallback
+- Privacy: raw statement must be deleted immediately after extraction
 
 ---
 
@@ -507,12 +511,14 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision ext
 
 ## App Architecture (MVP)
 
-- [ ] **ARCH-01** (TODO) – Expo + TS setup – [app.json](app.json)
+- [x] **ARCH-01** (DONE) – Expo + TS setup – [apps/mobile/app.json](apps/mobile/app.json)
   - **Acceptance:**
-    - Expo SDK installed and configured
-    - TypeScript strict mode enabled
-    - App runs on iOS and Android simulators/devices
-    - Navigation structure in place
+    - Expo SDK installed and configured ✅
+    - TypeScript strict mode enabled ✅
+    - App runs on iOS and Android simulators/devices ✅
+    - Navigation structure in place (file-based routing with Expo Router) ✅
+  - **Location:** [apps/mobile/](apps/mobile/)
+  - **Completed:** 2026-01-30
 
 - [ ] **ARCH-02** (TODO) – Local-first storage: AsyncStorage for loan + scenarios – [lib/storage/](lib/storage/)
   - **Acceptance:**
@@ -524,12 +530,12 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision ext
 - [ ] **ARCH-03** (TODO) – Optional Supabase sync (NOT in MVP unless required)
   - **Acceptance:** Supabase integration deferred; local-first only for MVP
 
-- [ ] **ARCH-04** (TODO) – AI extraction endpoint – [lib/extraction/gpt_vision.ts](lib/extraction/gpt_vision.ts)
+- [ ] **ARCH-04** (TODO) – Statement extraction service endpoint (Docling + OCRmyPDF; GPT fallback) – [lib/extraction/statement_extract.ts](lib/extraction/statement_extract.ts)
   - **Acceptance:**
-    - GPT-4o Vision API integration functional
-    - Endpoint receives image → returns structured JSON
+    - Document pipeline integration functional (Docling + OCRmyPDF)
+    - Endpoint receives PDF/image → returns structured JSON + confidence + provenance
     - Error handling for failed extractions
-    - API key stored securely (env vars)
+    - No LLM API keys in the mobile app. If GPT fallback exists, it runs server-side only.
 
 - [ ] **ARCH-05** (TODO) – Delete raw statement immediately after parsing
   - **Acceptance:**
@@ -595,10 +601,11 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision ext
 
 - [ ] **PH2-01** (TODO) – Camera capture – [app/screens/CaptureScreen.tsx](app/screens/CaptureScreen.tsx)
   - **Acceptance:** Camera access functional; user can snap statement photo
-- [ ] **PH2-02** (TODO) – PDF import – [app/screens/CaptureScreen.tsx](app/screens/CaptureScreen.tsx)
-  - **Acceptance:** User can select PDF from device storage
-- [ ] **PH2-03** (TODO) – GPT extraction endpoint integration – [lib/extraction/gpt_vision.ts](lib/extraction/gpt_vision.ts)
-  - **Acceptance:** GPT-4o Vision extracts fields >90% accuracy
+- [x] **PH2-02** (DONE) – PDF import – [apps/mobile/app/capture.tsx](apps/mobile/app/capture.tsx)
+  - **Acceptance:** User can select PDF from device storage ✅
+  - **Completed:** 2026-01-30
+- [ ] **PH2-03** (TODO) – Statement extraction endpoint integration (Option A pipeline) – [lib/extraction/statement_extract.ts](lib/extraction/statement_extract.ts)
+  - **Acceptance:** Pipeline returns fields + confidence + provenance; app shows confirm/edit screen
 - [ ] **PH2-04** (TODO) – Confirm screen w/ assumptions selector – [app/screens/ConfirmScreen.tsx](app/screens/ConfirmScreen.tsx)
   - **Acceptance:** User can edit fields and select assumptions before proceeding
 - [ ] **PH2-05** (TODO) – Save LoanProfile locally – [lib/storage/](lib/storage/)
@@ -725,7 +732,7 @@ Source: V5 concept and stack. (Expo + TS + Victory Native XL + GPT-4o Vision ext
 - TypeScript: strict mode, all types correct
 - CLI: honest about verification sources
 
-**Next Phase:** Phase 2 - Expo setup + Snap & Solve UI + GPT-4o extraction
+**Next Phase:** Phase 2 - Expo setup + Snap & Solve UI + statement extraction pipeline (Docling + OCRmyPDF; GPT fallback)
 
 **Commits/PRs:**
 - c9bd323: Golden: record calculator captures for 300k case
